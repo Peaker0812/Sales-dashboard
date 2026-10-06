@@ -1,0 +1,60 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  nodeVersion: '18.x'
+
+stages:
+
+- stage: BuildAndTest
+  displayName: 'Build & Test'
+  jobs:
+  - job: BuildJob
+    displayName: 'Build & Test'
+    steps:
+    
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(nodeVersion)
+      displayName: 'Install Node.js'
+    
+    - script: npm install
+      displayName: 'Install Dependencies'
+    
+    - script: npm test
+      displayName: 'Run Tests'
+    
+    - script: npm run build
+      displayName: 'Build'
+
+- stage: PublishArtifacts
+  displayName: 'Publish Artifacts'
+  dependsOn: BuildAndTest
+  condition: succeeded()
+  jobs:
+  - job: PublishJob
+    displayName: 'Package & Publish'
+    steps:
+    
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(nodeVersion)
+      displayName: 'Install Node.js'
+    
+    - script: npm install
+      displayName: 'Install Dependencies'
+    
+    - script: mkdir -p $(Build.ArtifactStagingDirectory)
+      displayName: 'Create Artifact Directory'
+    
+    - script: cp -r backend frontend package.json package-lock.json $(Build.ArtifactStagingDirectory)/
+      displayName: 'Copy Files'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'sales-dashboard'
+      displayName: 'Publish Artifacts'
