@@ -47,3 +47,4 @@ sales-dashboard/
 This repo intentionally has **no pipeline file**. To finish the assignment,
 push this to GitHub, connect it to Azure DevOps, and create your own
 `azure-pipelines.yml` that runs `npm install`, `npm test`, and `npm run build`.
+# Updated version
